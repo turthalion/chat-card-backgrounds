@@ -1,8 +1,10 @@
-<li class="chat-message message flexcol {{cssClass}}" data-message-id="{{message._id}}" {{#if (userColor message.user true)}}style="border-color:{{userColor message.user true}}"{{else if borderColor}}style="border-color:{{borderColor}}"{{/if}}>
+<li class="chat-message message flexcol {{cssClass}}" data-message-id="{{message._id}}" {{#if (isStyled message.user)}}{{#if (userColor message.user true)}}style="border-color:{{userColor message.user true}}"{{else if borderColor}}style="border-color:{{borderColor}}"{{/if}}{{/if}}>
     <header class="message-header flexrow" {{#if (userColor message.user true)}}style="background-color:{{userColor message.user true}}; color: {{userColor message.user false}};"{{/if}}>
+        {{#if (isStyled message.user)}}
         <div class="portraitContainer">
             <img class="portrait" src="{{speakerImage message.speaker}}" height="32" />
         </div>
+        {{/if}}
         <h4 class="message-sender" {{#if (userColor message.user false)}}style="color: {{userColor message.user false}};"{{/if}}>{{alias}}</h4>
         <span class="message-metadata">
             <time class="message-timestamp">{{timeSince message.timestamp}}</time>

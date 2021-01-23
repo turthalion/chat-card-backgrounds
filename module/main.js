@@ -1,10 +1,43 @@
 Hooks.once('init', async function () {
     CONFIG.ChatMessage.template = "modules/df-chat-cards/templates/base-chat-message.html";
+
+    game.settings.register("df-chat-cards", "displaySetting", {
+        name: "Display setting",
+        hint: "Configure which cards should receive custom styling, and which ones should be left as default. Changing this may require you to refresh your window.",
+        scope: "client",
+        config: true,
+        default: "allCards",
+        type: String,
+        choices: {
+            "allCards": "Affect every message.",
+            "selfAndGM": "Affect own messages and GM messages.",
+            "self": "Only affect own messages.",
+            "gm": "Only affect GM messages.",
+            "player": "Only affect player messages.",
+            "none": "Don't affect any messages."
+        }
+    });
 });
 
 Hooks.once("setup", function () {
     Handlebars.registerHelper("userColor", function (userId, isBackground) {
-        const userColor = game.users.get(userId)?.data?.color;
+        const setting = game.settings.get("df-chat-cards", "displaySetting");
+        if (setting === "none") {
+            return null;
+        }
+
+        const user = game.users.get(userId);
+        if (setting === "self" && user.data._id !== game.user.data._id) {
+            return null;
+        } else if (setting === "selfAndGM" && user.data._id !== game.user.data._id && !user.isGM) {
+            return null;
+        } else if (setting === "gm" && !user.isGM) {
+            return null;
+        } else if (setting === "player" && user.isGM) {
+            return null;
+        }
+
+        const userColor = user?.data?.color;
         if (!userColor) {
             return null;
         }
@@ -41,5 +74,24 @@ Hooks.once("setup", function () {
         }
 
         return "icons/svg/mystery-man.svg";
+    });
+
+    Handlebars.registerHelper("isStyled", function (userId) {
+        const setting = game.settings.get("df-chat-cards", "displaySetting");
+        if (setting === "none") {
+            return false;
+        }
+
+        const user = game.users.get(userId);
+        if (setting === "self" && user.data._id !== game.user.data._id) {
+            return false;
+        } else if (setting === "selfAndGM" && user.data._id !== game.user.data._id && !user.isGM) {
+            return false;
+        } else if (setting === "gm" && !user.isGM) {
+            return false;
+        } else if (setting === "player" && user.isGM) {
+            return false;
+        }
+        return true;
     });
 });
