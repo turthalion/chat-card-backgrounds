@@ -1,0 +1,17 @@
+.message-header {
+    display:flex;
+    align-items: center;
+}
+
+.portraitContainer {
+    height: 32px;
+    width: 48px;
+}
+
+.portrait {
+    flex: 0;
+    border: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
