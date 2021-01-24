@@ -1,3 +1,24 @@
+function shouldOverrideMessage(message) {
+    const setting = game.settings.get("df-chat-cards", "displaySetting");
+    if (setting !== "none") {
+        const user = game.users.get(message.user);
+        if (user) {
+            const isSelf = user.data._id === game.user.data._id;
+            const isGM = user.isGM;
+
+            if ((setting === "allCards")
+                || (setting === "self" && isSelf)
+                || (setting === "selfAndGM" && (isSelf || isGM))
+                || (setting === "gm" && isGM)
+                || (setting === "player" && !isGM)
+            ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 Hooks.once('init', async function () {
     CONFIG.ChatMessage.template = "modules/df-chat-cards/templates/base-chat-message.html";
 
@@ -17,81 +38,148 @@ Hooks.once('init', async function () {
             "none": "Don't affect any messages."
         }
     });
+
+    game.settings.register("df-chat-cards", "cardStyle", {
+        name: "Card style",
+        hint: "Configure how the card will highlight the player colour.",
+        scope: "client",
+        config: true,
+        default: "header",
+        type: String,
+        choices: {
+            "header": "Change the colour of the header.",
+            "underline": "Underline the title text with the player's colour.",
+            "topBar": "Coloured bar at the top of the message."
+        }
+    });
+
+    game.settings.register("df-chat-cards", "borderOverride", {
+        name: "Override border",
+        hint: "Enables border colour override. This will colour the border of the chat card with the player's colour.",
+        scope: "client",
+        config: true,
+        default: true,
+        type: Boolean
+    });
 });
 
 Hooks.once("setup", function () {
-    Handlebars.registerHelper("userColor", function (userId, isBackground) {
-        const setting = game.settings.get("df-chat-cards", "displaySetting");
-        if (setting === "none") {
-            return null;
-        }
+    Handlebars.registerHelper("getSpeakerImage", function (message) {
+        const speaker = message.speaker;
+        if (speaker) {
+            if (speaker.token) {
+                const token = canvas?.tokens?.get(speaker.token);
+                if (token) {
+                    return token.data.img;
+                }
+            }
 
-        const user = game.users.get(userId);
-        if (setting === "self" && user.data._id !== game.user.data._id) {
-            return null;
-        } else if (setting === "selfAndGM" && user.data._id !== game.user.data._id && !user.isGM) {
-            return null;
-        } else if (setting === "gm" && !user.isGM) {
-            return null;
-        } else if (setting === "player" && user.isGM) {
-            return null;
-        }
-
-        const userColor = user?.data?.color;
-        if (!userColor) {
-            return null;
+            if (speaker.actor) {
+                const actor = Actors.instance.get(speaker.actor);
+                if (actor) {
+                    return actor.data.img;
+                }
+            }
         }
         
-        if (isBackground) {
-            return userColor;
-        }
-
-        const hexColor = userColor.replace("#", "");
-        var r = parseInt(hexColor.substr(0,2),16);
-        var g = parseInt(hexColor.substr(2,2),16);
-        var b = parseInt(hexColor.substr(4,2),16);
-        var yiq = ((r*299)+(g*587)+(b*114))/1000;
-        return (yiq >= 128) ? '#333' : '#E7E7E7';
-    });
-
-    Handlebars.registerHelper("speakerImage", function (speaker) {
-        if (!speaker) {
-            return "icons/svg/mystery-man.svg";
-        }
-
-        if (speaker.token) {
-            const token = canvas?.tokens?.get(speaker.token);
-            if (token) {
-                return token.data.img;
-            }
-        }
-
-        if (speaker.actor) {
-            const actor = Actors.instance.get(speaker.actor);
-            if (actor) {
-                return actor.data.img;
-            }
-        }
-
         return "icons/svg/mystery-man.svg";
     });
 
-    Handlebars.registerHelper("isStyled", function (userId) {
-        const setting = game.settings.get("df-chat-cards", "displaySetting");
-        if (setting === "none") {
+    Handlebars.registerHelper("showSpeakerImage", function (message) {
+        const speaker = message.speaker;
+        if (!speaker) {
             return false;
+        } else {
+            let bHasImage = false;
+            if (speaker.token) {
+                const token = canvas?.tokens?.get(speaker.token);
+                if (token) {
+                    bHasImage = bHasImage || token.data.img != null;
+                }
+            }
+
+            if (speaker.actor) {
+                const actor = Actors.instance.get(speaker.actor);
+                if (actor) {
+                    bHasImage = bHasImage || actor.data.img != null;
+                }
+            }
+
+            if (!bHasImage) {
+                return false;
+            }
         }
 
-        const user = game.users.get(userId);
-        if (setting === "self" && user.data._id !== game.user.data._id) {
-            return false;
-        } else if (setting === "selfAndGM" && user.data._id !== game.user.data._id && !user.isGM) {
-            return false;
-        } else if (setting === "gm" && !user.isGM) {
-            return false;
-        } else if (setting === "player" && user.isGM) {
-            return false;
+        return shouldOverrideMessage(message);
+    });
+
+    Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
+        const borderOverride = game.settings.get("df-chat-cards", "borderOverride");
+        if (borderOverride && shouldOverrideMessage(message)) {
+            const user = game.users.get(message.user);
+            return `border-color: ${user.data.color}`;
         }
-        return true;
+
+        if (foundryBorder) {
+            return `border-color: ${foundryBorder}`;
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getHeaderStyle", function (message) {
+        if (shouldOverrideMessage(message)) {
+            const user = game.users.get(message.user);
+
+            const cardStyle = game.settings.get("df-chat-cards", "cardStyle");
+            if (cardStyle !== "header") {
+                return "";
+            }
+
+            const hexColor = user.data.color.replace("#", "");
+            var r = parseInt(hexColor.substr(0,2),16);
+            var g = parseInt(hexColor.substr(2,2),16);
+            var b = parseInt(hexColor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
+
+            return `background-color:${user.data.color}; color: ${textColor};`;
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getTitleStyle", function (message) {
+        if (shouldOverrideMessage(message)) {
+            const user = game.users.get(message.user);
+
+            const cardStyle = game.settings.get("df-chat-cards", "cardStyle");
+            if (cardStyle === "underline") {
+                return `box-shadow: inset 0px -2px 0 ${user.data.color};`;
+            } else if (cardStyle === "topBar") {
+                return "";
+            }
+            
+            const hexColor = user.data.color.replace("#", "");
+            var r = parseInt(hexColor.substr(0,2),16);
+            var g = parseInt(hexColor.substr(2,2),16);
+            var b = parseInt(hexColor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
+
+            return `color: ${textColor};`;
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getUserColor", function (message) {
+        if (shouldOverrideMessage(message)) {
+            const user = game.users.get(message.user);
+            return user.data.color;
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getCardStyle", function () {
+        const cardStyle = game.settings.get("df-chat-cards", "cardStyle");
+        return cardStyle;
     });
 });
