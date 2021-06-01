@@ -1,3 +1,6 @@
+1.2
++ Updated to FoundryVTT v0.8.x.
+
 1.1
 + Added support to affect specific groups of messages through a client side setting.
 + Added support to enable border colour override.

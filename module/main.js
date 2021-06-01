@@ -68,7 +68,7 @@ Hooks.once("setup", function () {
         const speaker = message.speaker;
         if (speaker) {
             if (speaker.token) {
-                const token = canvas?.tokens?.get(speaker.token);
+                const token = canvas?.tokens?.getDocuments().get(speaker.token);
                 if (token) {
                     return token.data.img;
                 }
@@ -92,7 +92,7 @@ Hooks.once("setup", function () {
         } else {
             let bHasImage = false;
             if (speaker.token) {
-                const token = canvas?.tokens?.get(speaker.token);
+                const token = canvas?.tokens?.getDocuments().get(speaker.token);
                 if (token) {
                     bHasImage = bHasImage || token.data.img != null;
                 }
