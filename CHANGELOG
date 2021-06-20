@@ -1,5 +1,8 @@
+1.2.1
++ Updated to FoundryVTT v0.8.7.
+
 1.2
-+ Updated to FoundryVTT v0.8.x.
++ Updated to FoundryVTT v0.8.6.
 
 1.1
 + Added support to affect specific groups of messages through a client side setting.
