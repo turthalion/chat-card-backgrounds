@@ -3,7 +3,7 @@
     "type": "module",
     "title": "Deepflame's Chat Cards",
     "description": "A module to alter the base chat cards.",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "author": "Deepflame",
     "includes": [
         "./module/**",
@@ -17,5 +17,5 @@
     "manifest": "https://gitlab.com/TimToxopeus/df-chat-cards/-/raw/master/module.json",
     "download": "https://gitlab.com/TimToxopeus/df-chat-cards/-/archive/master/df-chat-cards-master.zip",
     "minimumCoreVersion": "0.8.5",
-    "compatibleCoreVersion": "0.8.7"
+    "compatibleCoreVersion": "0.8.8"
 }
