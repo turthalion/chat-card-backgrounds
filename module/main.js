@@ -61,6 +61,15 @@ Hooks.once('init', async function () {
         default: true,
         type: Boolean
     });
+
+    game.settings.register("df-chat-cards", "insertSpeakerImage", {
+        name: "Insert Speaker Image",
+        hint: "Adds the image of the speaker to the chat card.",
+        scope: "client",
+        config: true,
+        default: true,
+        type: Boolean
+    });
 });
 
 Hooks.once("setup", function () {
@@ -86,6 +95,11 @@ Hooks.once("setup", function () {
     });
 
     Handlebars.registerHelper("showSpeakerImage", function (message) {
+        const insertSpeakerImage = game.settings.get("df-chat-cards", "insertSpeakerImage");
+        if (!insertSpeakerImage) {
+            return false;
+        }
+
         const speaker = message.speaker;
         if (!speaker) {
             return false;

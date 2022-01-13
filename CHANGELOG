@@ -1,3 +1,6 @@
+1.2.5
++ Added setting that allows you to disable speaker images. Useful for systems that already provide an image into the chat.
+
 1.2.4
 + Added support for .webm avatar tokens.
 

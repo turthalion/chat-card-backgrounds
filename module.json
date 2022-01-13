@@ -3,7 +3,7 @@
     "type": "module",
     "title": "Deepflame's Chat Cards",
     "description": "A module to alter the base chat cards.",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "author": "Deepflame",
     "includes": [
         "./module/**",
