@@ -68,7 +68,7 @@ Hooks.once("setup", function () {
         const speaker = message.speaker;
         if (speaker) {
             if (speaker.token) {
-                const token = canvas?.tokens?.getDocuments().get(speaker.token);
+                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
                 if (token) {
                     return token.data.img;
                 }
@@ -92,7 +92,7 @@ Hooks.once("setup", function () {
         } else {
             let bHasImage = false;
             if (speaker.token) {
-                const token = canvas?.tokens?.getDocuments().get(speaker.token);
+                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
                 if (token) {
                     bHasImage = bHasImage || token.data.img != null;
                 }
@@ -111,6 +111,32 @@ Hooks.once("setup", function () {
         }
 
         return shouldOverrideMessage(message);
+    });
+
+    Handlebars.registerHelper("useVideoForSpeakerImage", function (message) {
+        const speaker = message.speaker;
+        if (!speaker) {
+            return false;
+        } else {
+            let imageName = "";
+            if (speaker.token) {
+                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
+                if (token) {
+                    imageName = token.data.img;
+                }
+            }
+
+            if (!imageName && speaker.actor) {
+                const actor = Actors.instance.get(speaker.actor);
+                if (actor) {
+                    imageName = actor.data.img;
+                }
+            }
+
+            return imageName?.endsWith("webm") || imageName?.endsWith("mp4") || imageName?.endsWith("ogg") || false;
+        }
+
+        return false;
     });
 
     Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
