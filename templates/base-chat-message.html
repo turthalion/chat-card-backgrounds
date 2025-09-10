@@ -14,13 +14,7 @@
         {{/if}}
         <h4 class="message-sender" style="{{getTitleStyle this}}">{{this.alias}}</h4>
         <span class="message-metadata" style="{{getTitleStyle this}}">
-            <time class="message-timestamp">
-              {{#if this.timestamp}}
-                  {{timeSince this.timestamp}}
-              {{else}}
-                &mdash;
-              {{/if}}
-            </time>
+            <time class="message-timestamp"></time>
         </span>
 
         {{#if this.isWhisper}}

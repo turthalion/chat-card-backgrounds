@@ -212,7 +212,45 @@ Hooks.once("setup", function () {
     });
 });
 
-Hooks.on("renderChatMessage", (message, html, data) => {
-  console.log("Message doc:", message);
-  console.log("Template data:", data);
+Hooks.on("renderChatMessageHTML", (app, html, data) => {
+  const timeEl = html.querySelector(".message-timestamp");
+  if (!timeEl || !data.message.timestamp) return;
+
+  const updateTime = () => {
+    const now = Date.now();
+    const diff = now - data.message.timestamp;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours   = Math.floor(minutes / 60);
+    const days    = Math.floor(hours / 24);
+
+    let display = "";
+    if (minutes < 1) {
+      display = "Now";
+    } else if (days > 0) {
+      display = `${days}d ago`;
+    } else if (hours > 0) {
+      display = `${hours}h ago`;
+    } else {
+      display = `${minutes}m ago`;
+    }
+
+    timeEl.textContent = display;
+  };
+
+  // Initial render
+  updateTime();
+
+  // Live update every 60 seconds
+  const interval = setInterval(updateTime, 60000);
+
+  // Clean up interval when the message element is removed
+  const observer = new MutationObserver((mutations, obs) => {
+    if (!document.body.contains(timeEl)) {
+      clearInterval(interval);
+      obs.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 });
+
