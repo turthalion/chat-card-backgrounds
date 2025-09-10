@@ -1,34 +1,38 @@
-<li class="chat-message message flexcol {{cssClass}}" data-message-id="{{message._id}}" style="{{getBorderStyle message borderColor}}">
-    {{#if (and (eq (getCardStyle) "topBar") (showSpeakerImage message))}}
-    <span style="background-color: {{getUserColor message}}; max-height: 6px;">&nbsp;</span>
+<li class="chat-message message flexcol {{cssClass}}" data-message-id="{{this.id}}" style="{{getBorderStyle this borderColor}}">
+    {{#if (and (eq (getCardStyle) "topBar") (showSpeakerImage this))}}
+    <span style="background-color: {{getUserColor this}}; max-height: 6px;">&nbsp;</span>
     {{/if}}
-    <header class="message-header flexrow" style="{{getHeaderStyle message}}">
-        {{#if (showSpeakerImage message)}}
+    <header class="message-header flexrow" style="{{getHeaderStyle this}}">
+        {{#if (showSpeakerImage this)}}
         <div class="portraitContainer">
-            {{#if (useVideoForSpeakerImage message)}}
-                <video class="portrait" height="32" src="{{getSpeakerImage message}}" autoplay muted loop />
+            {{#if (useVideoForSpeakerImage this)}}
+                <video class="portrait" height="32" src="{{getSpeakerImage this}}" autoplay muted loop></video>
             {{else}}
-            <img class="portrait" src="{{getSpeakerImage message}}" height="32" />
+                <img class="portrait" src="{{getSpeakerImage this}}" height="32" />
             {{/if}}
         </div>
         {{/if}}
-        <h4 class="message-sender" style="{{getTitleStyle message}}">{{alias}}</h4>
-        <span class="message-metadata" style="{{getTitleStyle message}}">
-            <time class="message-timestamp">{{timeSince message.timestamp}}</time>
-            {{#if user.isGM}}
-            <a class="button message-delete"><i class="fas fa-trash"></i></a>
-            {{/if}}
+        <h4 class="message-sender" style="{{getTitleStyle this}}">{{this.alias}}</h4>
+        <span class="message-metadata" style="{{getTitleStyle this}}">
+            <time class="message-timestamp">
+              {{#if this.timestamp}}
+                  {{timeSince this.timestamp}}
+              {{else}}
+                &mdash;
+              {{/if}}
+            </time>
         </span>
 
-        {{#if isWhisper}}
-        <span class="whisper-to">{{localize 'CHAT.To'}}: {{whisperTo}}</span>
+        {{#if this.isWhisper}}
+        <span class="whisper-to">{{localize 'CHAT.To'}}: {{this.whisperTo}}</span>
         {{/if}}
 
-        {{#if message.flavor}}
-        <span class="flavor-text">{{{message.flavor}}}</span>
+        {{#if this.flavor}}
+        <span class="flavor-text">{{{this.flavor}}}</span>
         {{/if}}
     </header>
     <div class="message-content">
         {{{message.content}}}
     </div>
 </li>
+
