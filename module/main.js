@@ -1,30 +1,22 @@
 function shouldOverrideMessage(message) {
     const setting = game.settings.get("chat-card-backgrounds", "displaySetting");
     if (setting !== "none") {
-        const sender = getSenderUser(message);
-        if (sender) {
-            const isSelf = sender.id === game.user.id;
-            const isGM = sender.isGM;
+        const user = message.author;
+        if (user) {
+            const isSelf = user.id === game.user.id;
+            const isGM = user.isGM;
 
-            if ((setting === "allCards"
+            if ((setting === "allCards")
                 || (setting === "self" && isSelf)
                 || (setting === "selfAndGM" && (isSelf || isGM))
                 || (setting === "gm" && isGM)
-                || (setting === "player" && !isGM))) {
-                  return true;
+                || (setting === "player" && !isGM)
+            ) {
+                return true;
             }
         }
     }
     return false;
-}
-
-function getSenderUser(message) {
-  // v13: prefer the "author" getter (User document)
-  if (message.author) return message.author;
-
-  // fallback: if only raw source was passed
-  const userId = message.user?.id ?? message.user ?? message.author ?? message._source?.author;
-  return game.users.get(userId) ?? null;
 }
 
 Hooks.once('init', async function () {
@@ -55,9 +47,9 @@ Hooks.once('init', async function () {
         default: "header",
         type: String,
         choices: {
-            "header": "Colour the header",
-            "underline": "Underline title text",
-            "topBar": "Coloured bar at top"
+            "header": "Change the colour of the header.",
+            "underline": "Underline the title text with the player's colour.",
+            "topBar": "Coloured bar at the top of the message."
         }
     });
 
@@ -87,7 +79,7 @@ Hooks.once("setup", function () {
             if (speaker.token) {
                 const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
                 if (token) {
-                    return token.texture.src
+                    return token.texture.src;
                 }
             }
 
@@ -97,160 +89,151 @@ Hooks.once("setup", function () {
                     return actor.img;
                 }
             }
-        }
 
+            if (message.author) {
+                const author =  game.users.get(message.author);
+                if (author) {
+                    return author.avatar;
+                }
+            }
+        }
         return "icons/svg/mystery-man.svg";
     });
 
     Handlebars.registerHelper("showSpeakerImage", function(message) {
         const insertSpeakerImage = game.settings.get("chat-card-backgrounds", "insertSpeakerImage");
-        if (!insertSpeakerImage) return false;
+        if (!insertSpeakerImage) {
+            return false;
+        }
 
         const speaker = message.speaker;
-        if (!speaker) return false;
+        if (!speaker) {
+            return false;
+        } else {
+            let bHasImage = false;
+            if (speaker.token) {
+                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
+                if (token) {
+                    bHasImage = bHasImage || token.texture.src != null;
+                }
+            }
 
-        let bHasImage = false;
+            if (speaker.actor) {
+                const actor = game.actors.get(speaker.actor);
+                if (actor) {
+                    bHasImage = bHasImage || actor.img != null;
+                }
+            }
 
-        if (speaker.token) {
-            const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
-            if (token) bHasImage = bHasImage ||= !!token.texture.src;
+            if (!bHasImage) {
+                // fallback: use user avatar
+                const author = game.users.get(message.author);
+                if (author) {
+                    bHasImage = bHasImage || author.avatar != null;
+                }
+            }
+
+            if (!bHasImage) {
+                return false;
+            }
         }
-
-        if (speaker.actor) {
-            const actor = game.actors.get(speaker.actor);
-            if (actor) bHasImage = bHasImage ||= !!actor.img;
-        }
-
-        if (!bHasImage) return false;
 
         return shouldOverrideMessage(message);
     });
 
-    Handlebars.registerHelper("useVideoForSpeakerImage", function(message) {
+    Handlebars.registerHelper("useVideoForSpeakerImage", function (message) {
         const speaker = message.speaker;
-        if (!speaker) return false;
+        if (!speaker) {
+            return false;
+        } else {
+            let imageName = "";
+            if (speaker.token) {
+                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
+                if (token) {
+                    imageName = token.texture.src;
+                }
+            }
 
-        let img = "";
-        if (speaker.token) {
-            const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
-            if (token) img = token.texture.src;
+            if (!imageName && speaker.actor) {
+                const actor = game.actors.get(speaker.actor);
+                if (actor) {
+                    imageName = actor.img;
+                }
+            }
+
+            return imageName?.endsWith("webm") || imageName?.endsWith("mp4") || imageName?.endsWith("ogg") || false;
         }
 
-        if (!img && speaker.actor) {
-            const actor = game.actors.get(speaker.actor);
-            if (actor) img = actor.img;
-        }
-
-        return img?.endsWith("webm") || img?.endsWith("mp4") || img?.endsWith("ogg") || false;
+        return false;
     });
 
-    Handlebars.registerHelper("getBorderStyle", function(message, foundryBorder) {
+    Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
         const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
         if (borderOverride && shouldOverrideMessage(message)) {
-            const sender = getSenderUser(message);
-            return sender ? `border-color: ${sender.color}` : "";
+            const user = game.users.get(message.author);
+            return `border-color: ${user.color}`;
         }
-        if (foundryBorder) return `border-color: ${foundryBorder}`;
+
+        if (foundryBorder) {
+            return `border-color: ${foundryBorder}`;
+        }
         return "";
     });
 
-    Handlebars.registerHelper("getHeaderStyle", function(message) {
+    Handlebars.registerHelper("getHeaderStyle", function (message) {
         if (shouldOverrideMessage(message)) {
-            const sender = getSenderUser(message);
-            if (!sender) return "";
+            const user = game.users.get(message.user);
 
             const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-            if (cardStyle !== "header") return "";
+            if (cardStyle !== "header") {
+                return "";
+            }
 
-            const hexColor = String(sender.color ?? "#000000").replace("#", "");
-            const r = parseInt(hexColor.substr(0, 2), 16);
-            const g = parseInt(hexColor.substr(2, 2), 16);
-            const b = parseInt(hexColor.substr(4, 2), 16);
-            const yiq = ((r * 299) + (g * 587) + (b * 114))/1000;
+            const hexColor = user.color.css.replace("#", "");
+            var r = parseInt(hexColor.substr(0,2),16);
+            var g = parseInt(hexColor.substr(2,2),16);
+            var b = parseInt(hexColor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
             const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
 
-            return `background-color:${sender.color}; color: ${textColor};`;
+            return `background-color:${user.color.css}; color: ${textColor};`;
         }
         return "";
     });
 
-    Handlebars.registerHelper("getTitleStyle", function(message) {
-        if (!shouldOverrideMessage(message)) return "";
+    Handlebars.registerHelper("getTitleStyle", function (message) {
+        if (shouldOverrideMessage(message)) {
+            const user = game.users.get(message.author);
 
-        const sender = getSenderUser(message);
-        if (!sender) return "";
+            const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+            if (cardStyle === "underline") {
+                return `box-shadow: inset 0px 2px 0 ${user.color.css};`;
+            } else if (cardStyle === "topBar") {
+                return "";
+            }
 
-        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+            const hexColor = user.color.css.replace("#", "");
+            var r = parseInt(hexColor.substr(0,2),16);
+            var g = parseInt(hexColor.substr(2,2),16);
+            var b = parseInt(hexColor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
 
-        if (cardStyle === "underline") {
-            return `box-shadow: inset 0px -2px 0 ${sender.color}`;
-        } else if (cardStyle === "topBar") {
-            return ""; // handled in template span
+            return `color: ${textColor}; --chat-contrast-color: ${textColor}`;
         }
-
-        // header fallback
-        const hexColor = String(sender.color ?? "#000000").replace("#", "");
-        const r = parseInt(hexColor.substr(0, 2), 16);
-        const g = parseInt(hexColor.substr(2, 2), 16);
-        const b = parseInt(hexColor.substr(4, 2), 16);
-        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
-
-        return `color: ${textColor}`;
+        return "";
     });
 
     Handlebars.registerHelper("getUserColor", function (message) {
         if (shouldOverrideMessage(message)) {
-            const sender = getSenderUser(message);
-            return sender?.color ?? "";
+            const user = game.users.get(message.author);
+            return user.color.css;
         }
         return "";
     });
 
     Handlebars.registerHelper("getCardStyle", function () {
-        return game.settings.get("chat-card-backgrounds", "cardStyle");
+        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+        return cardStyle;
     });
 });
-
-Hooks.on("renderChatMessageHTML", (app, html, data) => {
-  const timeEl = html.querySelector(".message-timestamp");
-  if (!timeEl || !data.message.timestamp) return;
-
-  const updateTime = () => {
-    const now = Date.now();
-    const diff = now - data.message.timestamp;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours   = Math.floor(minutes / 60);
-    const days    = Math.floor(hours / 24);
-
-    let display = "";
-    if (minutes < 1) {
-      display = "Now";
-    } else if (days > 0) {
-      display = `${days}d ago`;
-    } else if (hours > 0) {
-      display = `${hours}h ago`;
-    } else {
-      display = `${minutes}m ago`;
-    }
-
-    timeEl.textContent = display;
-  };
-
-  // Initial render
-  updateTime();
-
-  // Live update every 60 seconds
-  const interval = setInterval(updateTime, 60000);
-
-  // Clean up interval when the message element is removed
-  const observer = new MutationObserver((mutations, obs) => {
-    if (!document.body.contains(timeEl)) {
-      clearInterval(interval);
-      obs.disconnect();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-});
-
