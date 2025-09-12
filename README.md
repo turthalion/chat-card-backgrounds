@@ -16,7 +16,7 @@ In the setup screen, use the URL https://github.com/turthalion/chat-card-backgro
 As GM go to the **Manage Modules** options menu in your **World Settings** tab then enable the **Chat Card Backgrounds** module.
 
 ## Options
-![dialog-options](media/ccbg-options.webp)
+![dialog-options](media/ccbg-options.webp)  
 Options available are:
 * Display setting: choose to affect every message, your own and GM messages, just your own, just the GM, all players, or no messages
 * Card style: choose to change the header colour, underline the title text, or draw a coloured bar at the top of the message
@@ -27,15 +27,15 @@ Options available are:
 ## Styles
 
 ### Header style
-![header-style](media/ccbg-header.webp)
+![header-style](media/ccbg-header.webp)  
 Coloured header, with or without pictures
 
 ### Underline style
-![underline-style](media/ccbg-underline.webp)
+![underline-style](media/ccbg-underline.webp)  
 Underline style, with or without pictures
 
 ### Coloured bar style
-![coloured-bar-style](media/ccbg-coloured-bar.webp)
+![coloured-bar-style](media/ccbg-coloured-bar.webp)  
 Coloured bar style, with or without pictures
 
 ## Thanks
