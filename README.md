@@ -5,7 +5,7 @@
 ![All Releases Downloads](https://img.shields.io/github/downloads/turthalion/chat-card-backgrounds/total?logo=GitHub&style=for-the-badge) ![Latest Release Downloads](https://img.shields.io/github/downloads/turthalion/chat-card-backgrounds/latest/total?logo=GitHub&style=for-the-badge)
 
 A module to alter the base chat cards. This will colour the cards based on the player who added the chat entry. Based on Deepflame's Chat Cards but
-updated for v13.
+updated for Foundry v12-v13.
 
 ## Installation
 

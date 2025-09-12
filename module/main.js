@@ -22,6 +22,11 @@ function shouldOverrideMessage(message) {
 Hooks.once('init', async function () {
     CONFIG.ChatMessage.template = "modules/chat-card-backgrounds/templates/base-chat-message.html";
 
+    // Check Foundry version
+    const fv = game.release?.generation;
+    const isV12 = fv == 12;
+    console.log("Foundry version ", fv);
+
     game.settings.register("chat-card-backgrounds", "displaySetting", {
         name: "Display setting",
         hint: "Configure which cards should receive custom styling, and which ones should be left as default. Changing this may require you to refresh your window.",
@@ -66,10 +71,17 @@ Hooks.once('init', async function () {
         name: "Insert Speaker Image",
         hint: "Adds the image of the speaker to the chat card.",
         scope: "client",
-        config: true,
+        config: !isV12,
         default: true,
         type: Boolean
     });
+
+    // hard-disable speaker images automatically on v12
+    if (isV12) {
+        console.log("Foundry v12 detected, disabling speaker image injection");
+        game.settings.set("chat-card-backgrounds", "insertSpeakerImage", false);
+    }
+
 });
 
 Hooks.once("setup", function () {
