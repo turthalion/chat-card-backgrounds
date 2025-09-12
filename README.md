@@ -11,6 +11,8 @@ updated for Foundry v12-v13.
 
 In the setup screen, use the URL https://github.com/turthalion/chat-card-backgrounds/releases/latest/download/module.json to install the module.
 
+Tested with PF2e and DnD5e systems.
+
 ## Usage
 
 As GM go to the **Manage Modules** options menu in your **World Settings** tab then enable the **Chat Card Backgrounds** module.
@@ -23,6 +25,10 @@ Options available are:
 * Override border: choose to colour the border of the chat card
 * Insert Speaker Image: choose to add the image of the speaker to the chat card
   * If this option is selected, and the message author does not have a token controlled on the scene, their avatar image will be used instead
+
+## Notes
+* If using Foundry v12, image support is disabled to avoid double-stacking of images
+* If using Foundry v13, and DnD 5e (and possibly other systems) you must manually disable the chat images in the module to avoid double-stacking.
 
 ## Styles
 
