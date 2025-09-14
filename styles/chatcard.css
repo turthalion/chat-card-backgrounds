@@ -30,3 +30,4 @@
 .chat-message .message-header .user {
     color: var(--chat-contrast-color); /* ensures sender, timestamp, and user use same color */
 }
+

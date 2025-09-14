@@ -1,6 +1,6 @@
 <li class="chat-message message flexcol {{cssClass}}" data-message-id="{{message._id}}" style="{{getBorderStyle message borderColor}}">
     {{#if (eq (getCardStyle) "topBar")}}
-    <span style="background-color: {{getUserColor message}}; max-height: 6px;">&nbsp;</span>
+    <span style="background-color: {{getUserColor message}}; max-height: 6px;margin-bottom:2px;">&nbsp;</span>
     {{/if}}
     <header class="message-header flexrow" style="{{getHeaderStyle message}}">
         {{#if (showSpeakerImage message)}}
@@ -33,7 +33,9 @@
         {{/if}}
     <div style="flex-basis: 100%; height: 0;"></div> <!-- forces next flex items onto new line -->
     </header>
-    <div class="message-content" style="color: #111;">
+    <div class="message-content">
         {{{message.content}}}
     </div>
 </li>
+
+

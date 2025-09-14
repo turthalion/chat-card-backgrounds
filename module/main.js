@@ -54,7 +54,8 @@ Hooks.once('init', async function () {
         choices: {
             "header": "Change the colour of the header.",
             "underline": "Underline the title text with the player's colour.",
-            "topBar": "Coloured bar at the top of the message."
+            "topBar": "Coloured bar at the top of the message.",
+            "none": "No player colour highlight within the card itself."
         }
     });
 
@@ -198,6 +199,9 @@ Hooks.once("setup", function () {
 
             const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
             if (cardStyle !== "header") {
+                if (cardStyle === "underline") {
+                    return `border-bottom: 2px solid ${user.color.css};`;
+                }
                 return "";
             }
 
@@ -209,29 +213,6 @@ Hooks.once("setup", function () {
             const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
 
             return `background-color:${user.color.css}; color: ${textColor};`;
-        }
-        return "";
-    });
-
-    Handlebars.registerHelper("getTitleStyle", function (message) {
-        if (shouldOverrideMessage(message)) {
-            const user = game.users.get(message.author);
-
-            const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-            if (cardStyle === "underline") {
-                return `box-shadow: inset 0px 2px 0 ${user.color.css};`;
-            } else if (cardStyle === "topBar") {
-                return "";
-            }
-
-            const hexColor = user.color.css.replace("#", "");
-            var r = parseInt(hexColor.substr(0,2),16);
-            var g = parseInt(hexColor.substr(2,2),16);
-            var b = parseInt(hexColor.substr(4,2),16);
-            var yiq = ((r*299)+(g*587)+(b*114))/1000;
-            const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
-
-            return `color: ${textColor}; --chat-contrast-color: ${textColor}`;
         }
         return "";
     });

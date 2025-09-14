@@ -21,7 +21,7 @@ As GM go to the **Manage Modules** options menu in your **World Settings** tab t
 ![dialog-options](media/ccbg-options.webp)  
 Options available are:
 * Display setting: choose to affect every message, your own and GM messages, just your own, just the GM, all players, or no messages
-* Card style: choose to change the header colour, underline the title text, or draw a coloured bar at the top of the message
+* Card style: choose to change the header colour, underline the title text, draw a coloured bar at the top of the message, or provide no player colouring inside the chat card.
 * Override border: choose to colour the border of the chat card
 * Insert Speaker Image: choose to add the image of the speaker to the chat card
   * If this option is selected, and the message author does not have a token controlled on the scene, their avatar image will be used instead
