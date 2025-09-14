@@ -1,3 +1,5 @@
+13.0.3
+- Remove misplaced getTitleStyle span to avoid enlarging message content
 13.0.2
 - Add v12 support. Force remove picture support if Foundry version is V12
 13.0.1
