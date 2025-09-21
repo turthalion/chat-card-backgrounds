@@ -1,3 +1,6 @@
+# Version 13.0.5
+- Restore proper text colour for GM text blocks (closes [#3](https://github.com/turthalion/chat-card-backgrounds/issues/3))
+
 # Version 13.0.4
 - Restore proper underline mode functionality (closes [#2](https://github.com/turthalion/chat-card-backgrounds/issues/2))
 - Support "none" mode for card style (closes [#1](https://github.com/turthalion/chat-card-backgrounds/issues/1))

@@ -31,3 +31,9 @@
     color: var(--chat-contrast-color); /* ensures sender, timestamp, and user use same color */
 }
 
+/* Force all text inside PF2e GM visibility blocks back to their default readable dark color */
+[data-visibility="gm"],
+[data-visibility="gm"] * {
+  color: #444444 !important;
+}
+
