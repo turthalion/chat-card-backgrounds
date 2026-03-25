@@ -1,4 +1,4 @@
-<li class="chat-message message flexcol {{cssClass}}" data-message-id="{{message._id}}" style="{{getBorderStyle message borderColor}}">
+<li class="chat-message message flexcol {{cssClass}} {{getCardClass message}}" data-message-id="{{message._id}}" style="{{getCardMessageStyle message borderColor}}">
     {{#if (eq (getCardStyle) "topBar")}}
     <span style="background-color: {{getUserColor message}}; max-height: 6px;margin-bottom:2px;">&nbsp;</span>
     {{/if}}

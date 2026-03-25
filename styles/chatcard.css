@@ -21,6 +21,25 @@
     padding-bottom: 2px;
 }
 
+.chat-message.card-style-message {
+    overflow: hidden;
+    background-blend-mode: screen;
+}
+
+.chat-message.card-style-message .message-header,
+.chat-message.card-style-message .message-content {
+    background: transparent !important;
+}
+
+.chat-message .message-content {
+    color: var(--chat-contrast-color);
+}
+
+.chat-message .message-content,
+.chat-message .message-content * {
+    color: inherit;
+}
+
 .chat-message .message-header {
     color: var(--chat-contrast-color); /* default for header text */
 }
