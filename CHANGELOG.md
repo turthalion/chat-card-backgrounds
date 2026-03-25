@@ -1,3 +1,6 @@
+# Version 13.0.6
+- Add support for full chat message colouring (closes [#4](https://github.com/turthalion/chat-card-backgrounds/issues/4))
+
 # Version 13.0.5
 - Restore proper text colour for GM text blocks (closes [#3](https://github.com/turthalion/chat-card-backgrounds/issues/3))
 

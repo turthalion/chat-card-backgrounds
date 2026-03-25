@@ -1,3 +1,21 @@
+
+function getReadableTextColor(r, g, b) {
+    // perceived brightness
+    const luma = (r * 299 + g * 587 + b * 114) / 1000;
+
+    // saturation heuristic
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max - min;
+
+    // Highly saturated colors with screen blending need dark text
+    if (saturation > 110) {
+        return "#222";
+    }
+
+    return luma >= 135 ? "#222" : "#f2f2f2";
+}
+
 function shouldOverrideMessage(message) {
     const setting = game.settings.get("chat-card-backgrounds", "displaySetting");
     if (setting !== "none") {
@@ -55,6 +73,7 @@ Hooks.once('init', async function () {
             "header": "Change the colour of the header.",
             "underline": "Underline the title text with the player's colour.",
             "topBar": "Coloured bar at the top of the message.",
+            "message": "Change entire message background.",
             "none": "No player colour highlight within the card itself."
         }
     });
@@ -183,12 +202,55 @@ Hooks.once("setup", function () {
     Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
         const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
         if (borderOverride && shouldOverrideMessage(message)) {
+            // TODO: should this be message.user ?
             const user = game.users.get(message.author);
             return `border-color: ${user.color}`;
         }
 
         if (foundryBorder) {
             return `border-color: ${foundryBorder}`;
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getCardClass", function (message) {
+        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+        if (shouldOverrideMessage(message) && cardStyle === "message") {
+            return "card-style-message";
+        }
+        return "";
+    });
+
+    Handlebars.registerHelper("getCardMessageStyle", function (message, foundryBorder) {
+        if (shouldOverrideMessage(message)) {
+            const user = game.users.get(message.user);
+            if (!user) {
+                return "";
+            }
+
+            const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+            if (cardStyle !== "message") {
+                const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
+                if (borderOverride && shouldOverrideMessage(message)) {
+                    const user = game.users.get(message.user);
+                    return `border-color: ${user.color.css}`;
+                }
+
+                if (foundryBorder) {
+                    return `border-color: ${foundryBorder}`;
+                }
+                return "";
+            }
+
+            const hexColor = user.color.css.replace("#", "");
+            var r = parseInt(hexColor.substr(0,2),16);
+            var g = parseInt(hexColor.substr(2,2),16);
+            var b = parseInt(hexColor.substr(4,2),16);
+            //var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            //const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
+            const textColor = getReadableTextColor(r, g, b);
+
+            return `background-color:${user.color.css}; background-blend-mode: screen; color: ${textColor};border-color: ${user.color.css};`;
         }
         return "";
     });
