@@ -279,10 +279,10 @@ Hooks.once("setup", function () {
         const b = parseInt(hex.substr(4, 2), 16);
 
         const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        const textColor = yiq >= 160 ? "#222" : "#f2f2f2";
+        const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
 
         return `
-            background-color: rgba(${r}, ${g}, ${b}, 0.35);
+            background-color:${user.color.css};
             color: ${textColor};
             border-color: ${user.color.css};
         `;

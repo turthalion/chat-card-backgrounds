@@ -1,3 +1,6 @@
+# Version 13.1.2
+- Fix broken header-mode style.
+
 # Version 13.1.1
 - Modify full message colouring to be more similar to the header colouring to improve SF2e visibility and keep consistent chat card colouring regardless of selected colouring option.
 
