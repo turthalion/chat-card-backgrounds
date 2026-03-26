@@ -231,6 +231,8 @@ Hooks.once("setup", function () {
                 return "";
             }
 
+            /* With thanks to:
+             * https://24ways.org/2010/calculating-color-contrast/ */
             const hexColor = user.color.css.replace("#", "");
             var r = parseInt(hexColor.substr(0,2),16);
             var g = parseInt(hexColor.substr(2,2),16);
@@ -269,6 +271,8 @@ Hooks.once("setup", function () {
         // ─────────────────────────────
         // Message style - full card
         // ─────────────────────────────
+        /* With thanks to:
+         * https://24ways.org/2010/calculating-color-contrast/ */
         const hex = user.color.css.replace("#", "");
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
