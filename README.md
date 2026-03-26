@@ -31,6 +31,7 @@ Note that depending on player colour and the colouring options chosen, full visi
 ## Notes
 * If using Foundry v12, image support is disabled to avoid double-stacking of images
 * If using Foundry v13, and DnD 5e (and possibly other systems) you must manually disable the chat images in the module to avoid double-stacking.
+* Certain items may have visibility issues with full chat card colouring, depending on your system and the chosen colours.
 
 ## Styles
 
@@ -48,7 +49,7 @@ Coloured bar style, with or without pictures
 
 ### Full message style
 ![full-message-style](media/ccbg-full.webp)  
-Full message style, with or without pictures. Colour is blended with the regular chat card background.
+Full message style, with or without pictures.
 
 ## Thanks
 

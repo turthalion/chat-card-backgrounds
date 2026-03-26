@@ -1,3 +1,6 @@
+# Version 13.1.1
+- Modify full message colouring to be more similar to the header colouring to improve SF2e visibility and keep consistent chat card colouring regardless of selected colouring option.
+
 # Version 13.1.0
 - Add support for full chat message colouring (closes [#4](https://github.com/turthalion/chat-card-backgrounds/issues/4))
 

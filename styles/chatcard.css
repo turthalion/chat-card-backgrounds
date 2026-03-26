@@ -22,8 +22,28 @@
 }
 
 .chat-message.card-style-message {
+    color: inherit;
+}
+
+.chat-message.card-style-message .message-content,
+.chat-message.card-style-message .message-content * {
+    color: inherit;
+}
+
+.chat-message.card-style-message .success,
+.chat-message.card-style-message .critical.success {
+  color: #1f7a1f;
+}
+
+.chat-message.card-style-message .failure,
+.chat-message.card-style-message .critical.failure {
+  color: #a62222;
+}
+
+.chat-message.card-style-message {
     overflow: hidden;
     background-blend-mode: screen;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .chat-message.card-style-message .message-header,

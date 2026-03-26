@@ -1,4 +1,3 @@
-
 function getReadableTextColor(r, g, b) {
     // perceived brightness
     const luma = (r * 299 + g * 587 + b * 114) / 1000;
@@ -202,8 +201,7 @@ Hooks.once("setup", function () {
     Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
         const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
         if (borderOverride && shouldOverrideMessage(message)) {
-            // TODO: should this be message.user ?
-            const user = game.users.get(message.author);
+            const user = game.users.get(message.user);
             return `border-color: ${user.color}`;
         }
 
@@ -221,46 +219,12 @@ Hooks.once("setup", function () {
         return "";
     });
 
-    Handlebars.registerHelper("getCardMessageStyle", function (message, foundryBorder) {
-        if (shouldOverrideMessage(message)) {
-            const user = game.users.get(message.user);
-            if (!user) {
-                return "";
-            }
-
-            const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-            if (cardStyle !== "message") {
-                const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
-                if (borderOverride && shouldOverrideMessage(message)) {
-                    const user = game.users.get(message.user);
-                    return `border-color: ${user.color.css}`;
-                }
-
-                if (foundryBorder) {
-                    return `border-color: ${foundryBorder}`;
-                }
-                return "";
-            }
-
-            const hexColor = user.color.css.replace("#", "");
-            var r = parseInt(hexColor.substr(0,2),16);
-            var g = parseInt(hexColor.substr(2,2),16);
-            var b = parseInt(hexColor.substr(4,2),16);
-            //var yiq = ((r*299)+(g*587)+(b*114))/1000;
-            //const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
-            const textColor = getReadableTextColor(r, g, b);
-
-            return `background-color:${user.color.css}; background-blend-mode: screen; color: ${textColor};border-color: ${user.color.css};`;
-        }
-        return "";
-    });
-
     Handlebars.registerHelper("getHeaderStyle", function (message) {
         if (shouldOverrideMessage(message)) {
             const user = game.users.get(message.user);
 
             const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-            if (cardStyle !== "header") {
+            if (cardStyle !== "header" && cardStyle != "message") {
                 if (cardStyle === "underline") {
                     return `border-bottom: 2px solid ${user.color.css};`;
                 }
@@ -277,6 +241,47 @@ Hooks.once("setup", function () {
             return `background-color:${user.color.css}; color: ${textColor};`;
         }
         return "";
+    });
+
+    Handlebars.registerHelper("getMessageBodyStyle", function (message, foundryBorder) {
+        if (!shouldOverrideMessage(message)) return "";
+
+        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
+        const user = game.users.get(message.user);
+        if (!user?.color?.css) return "";
+
+        // ─────────────────────────────
+        // Non-message styles - border only
+        // ─────────────────────────────
+        if (cardStyle !== "message") {
+            const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
+
+            if (borderOverride) {
+                return `border-color: ${user.color.css};`;
+            }
+
+            if (foundryBorder) {
+                return `border-color: ${foundryBorder};`;
+            }
+            return "";
+        }
+
+        // ─────────────────────────────
+        // Message style - full card
+        // ─────────────────────────────
+        const hex = user.color.css.replace("#", "");
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        const textColor = yiq >= 160 ? "#222" : "#f2f2f2";
+
+        return `
+            background-color: rgba(${r}, ${g}, ${b}, 0.35);
+            color: ${textColor};
+            border-color: ${user.color.css};
+        `;
     });
 
     Handlebars.registerHelper("getUserColor", function (message) {
