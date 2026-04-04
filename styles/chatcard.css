@@ -26,7 +26,7 @@
 }
 
 .chat-message.card-style-message .message-content,
-.chat-message.card-style-message .message-content * {
+.chat-message.card-style-message .message-content *:not(.tag) {
     color: inherit;
 }
 
@@ -55,7 +55,7 @@
 }
 
 .chat-message .message-content,
-.chat-message .message-content * {
+.chat-message .message-content *:not(.tag) {
     color: inherit;
 }
 
