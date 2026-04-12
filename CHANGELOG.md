@@ -1,3 +1,8 @@
+# Version 13.1.3
+- Improve PF2e trait colouring per thejoester (closes [#7](https://github.com/turthalion/chat-card-backgrounds/issues/7))
+- Improve PF1e visibility by excluding certain classes from calculated text colours. Reduces effectiveness of some chat card background modes but
+  vastly improves readability (closes [#6](https://github.com/turthalion/chat-card-backgrounds/issues/6))
+
 # Version 13.1.2
 - Fix broken header-mode style.
 
