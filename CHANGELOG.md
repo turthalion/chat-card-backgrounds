@@ -1,4 +1,10 @@
+# Version 14.0.0
+- Foundry V14 support
+- Shift to hooking renderChatMessageHTML
+- Sunset V12/V13 support
+
 # Version 13.1.3
+- Final V12/V13 supporting release
 - Improve PF2e trait colouring per thejoester (closes [#7](https://github.com/turthalion/chat-card-backgrounds/issues/7))
 - Improve PF1e visibility by excluding certain classes from calculated text colours. Reduces effectiveness of some chat card background modes but
   vastly improves readability (closes [#6](https://github.com/turthalion/chat-card-backgrounds/issues/6))

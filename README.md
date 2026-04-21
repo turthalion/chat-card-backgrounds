@@ -5,13 +5,15 @@
 ![All Releases Downloads](https://img.shields.io/github/downloads/turthalion/chat-card-backgrounds/total?logo=GitHub&style=for-the-badge) ![Latest Release Downloads](https://img.shields.io/github/downloads/turthalion/chat-card-backgrounds/latest/total?logo=GitHub&style=for-the-badge)
 
 A module to alter the base chat cards. This will colour the cards based on the player who added the chat entry. Based on Deepflame's Chat Cards but
-updated for Foundry v12-v13.
+updated for Foundry v12-v13, and v14.
 
 ## Installation
 
 In the setup screen, use the URL https://github.com/turthalion/chat-card-backgrounds/releases/latest/download/module.json to install the module.
 
-Tested with PF2e and DnD5e systems.
+Tested with PF2e and DnD5e systems, and briefly with PF1e to support a user request.
+
+V14 testing with PF1e has been minimal thus far as as of 2026-04-21 the PF1e system has not been updated with a V14 release.
 
 ## Usage
 
@@ -28,10 +30,16 @@ Options available are:
 
 Note that depending on player colour and the colouring options chosen, full visibility of chat card messages may be compromised. Best guess efforts to arrive at a suitable text colour have been made in the code, but certain player colours may still cause issues, depending on the colour and/or your game system.
 
+In Foundry V14, this module leverages the V14 support for speaking as the user or in-character. When speaking as the user, the user's avatar can
+optionally be added to the message. When speaking in-character, no images are added and those decisions are left to the system.
+
 ## Notes
 * If using Foundry v12, image support is disabled to avoid double-stacking of images
 * If using Foundry v13, and DnD 5e (and possibly other systems) you must manually disable the chat images in the module to avoid double-stacking.
 * Certain items may have visibility issues with full chat card colouring, depending on your system and the chosen colours.
+* [V13.1.3](https://github.com/turthalion/chat-card-backgrounds/releases/download/13.1.3/module.json) is the final release supporting Foundry v12 and
+  Foundry v13
+* Completely revamped for V14 to hook on renderChatMessageHTML instead of depending on a base template
 
 ## Styles
 

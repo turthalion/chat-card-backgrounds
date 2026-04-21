@@ -1,20 +1,3 @@
-function getReadableTextColor(r, g, b) {
-    // perceived brightness
-    const luma = (r * 299 + g * 587 + b * 114) / 1000;
-
-    // saturation heuristic
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const saturation = max - min;
-
-    // Highly saturated colors with screen blending need dark text
-    if (saturation > 110) {
-        return "#222";
-    }
-
-    return luma >= 135 ? "#222" : "#f2f2f2";
-}
-
 function shouldOverrideMessage(message) {
     const setting = game.settings.get("chat-card-backgrounds", "displaySetting");
     if (setting !== "none") {
@@ -37,13 +20,6 @@ function shouldOverrideMessage(message) {
 }
 
 Hooks.once('init', async function () {
-    CONFIG.ChatMessage.template = "modules/chat-card-backgrounds/templates/base-chat-message.html";
-
-    // Check Foundry version
-    const fv = game.release?.generation;
-    const isV12 = fv == 12;
-    console.log("Foundry version ", fv);
-
     game.settings.register("chat-card-backgrounds", "displaySetting", {
         name: "Display setting",
         hint: "Configure which cards should receive custom styling, and which ones should be left as default. Changing this may require you to refresh your window.",
@@ -70,7 +46,7 @@ Hooks.once('init', async function () {
         type: String,
         choices: {
             "header": "Change the colour of the header.",
-            "underline": "Underline the title text with the player's colour.",
+            "underline": "Underline the header with the player's colour.",
             "topBar": "Coloured bar at the top of the message.",
             "message": "Change entire message background.",
             "none": "No player colour highlight within the card itself."
@@ -87,217 +63,109 @@ Hooks.once('init', async function () {
     });
 
     game.settings.register("chat-card-backgrounds", "insertSpeakerImage", {
-        name: "Insert Speaker Image",
-        hint: "Adds the image of the speaker to the chat card.",
+        name: "Insert user avatar image",
+        hint: "Adds the image of the user to the chat card when speaking as the user.",
         scope: "client",
-        config: !isV12,
+        config: true,
         default: true,
         type: Boolean
     });
-
-    // hard-disable speaker images automatically on v12
-    if (isV12) {
-        console.log("Foundry v12 detected, disabling speaker image injection");
-        game.settings.set("chat-card-backgrounds", "insertSpeakerImage", false);
-    }
-
 });
 
 Hooks.once("setup", function () {
-    Handlebars.registerHelper("getSpeakerImage", function (message) {
-        const speaker = message.speaker;
-        if (speaker) {
-            if (speaker.token) {
-                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
-                if (token) {
-                    return token.texture.src;
-                }
-            }
+    Hooks.on("renderChatMessageHTML", (message, element) => {
+        if (!shouldOverrideMessage(message)) return;
 
-            if (speaker.actor) {
-                const actor = game.actors.get(speaker.actor);
-                if (actor) {
-                    return actor.img;
-                }
-            }
+        const user = message.author;
+        if (!user) return;
 
-            if (message.author) {
-                const author =  game.users.get(message.author);
-                if (author) {
-                    return author.avatar;
-                }
-            }
-        }
-        return "icons/svg/mystery-man.svg";
-    });
+        const accent = user.color?.css || user.flags?.core?.color;
+        if (!accent) return;
 
-    Handlebars.registerHelper("showSpeakerImage", function(message) {
-        const insertSpeakerImage = game.settings.get("chat-card-backgrounds", "insertSpeakerImage");
-        if (!insertSpeakerImage) {
-            return false;
-        }
+        // Compute readable text color
+        const hex = accent.replace("#", "");
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
 
-        const speaker = message.speaker;
-        if (!speaker) {
-            return false;
-        } else {
-            let bHasImage = false;
-            if (speaker.token) {
-                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
-                if (token) {
-                    bHasImage = bHasImage || token.texture.src != null;
-                }
-            }
+        const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+        const text = yiq >= 128 ? "#333" : "#E7E7E7";
 
-            if (speaker.actor) {
-                const actor = game.actors.get(speaker.actor);
-                if (actor) {
-                    bHasImage = bHasImage || actor.img != null;
-                }
-            }
+        // We always want this property regardless of mode
+        element.style.setProperty("--ccb-accent", accent);
 
-            if (!bHasImage) {
-                // fallback: use user avatar
-                const author = game.users.get(message.author);
-                if (author) {
-                    bHasImage = bHasImage || author.avatar != null;
-                }
-            }
+        // Clear previous mode classes
+        element.classList.remove(
+            "ccb-border",
+            "ccb-header",
+            "ccb-underline",
+            "ccb-topbar",
+            "ccb-message"
+        );
 
-            if (!bHasImage) {
-                return false;
-            }
-        }
-
-        return shouldOverrideMessage(message);
-    });
-
-    Handlebars.registerHelper("useVideoForSpeakerImage", function (message) {
-        const speaker = message.speaker;
-        if (!speaker) {
-            return false;
-        } else {
-            let imageName = "";
-            if (speaker.token) {
-                const token = game.scenes.get(speaker.scene)?.tokens?.get(speaker.token);
-                if (token) {
-                    imageName = token.texture.src;
-                }
-            }
-
-            if (!imageName && speaker.actor) {
-                const actor = game.actors.get(speaker.actor);
-                if (actor) {
-                    imageName = actor.img;
-                }
-            }
-
-            return imageName?.endsWith("webm") || imageName?.endsWith("mp4") || imageName?.endsWith("ogg") || false;
-        }
-
-        return false;
-    });
-
-    Handlebars.registerHelper("getBorderStyle", function (message, foundryBorder) {
+        // Check if border is to be styled
         const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
-        if (borderOverride && shouldOverrideMessage(message)) {
-            const user = game.users.get(message.user);
-            return `border-color: ${user.color}`;
+        element.classList.toggle("ccb-border", borderOverride);
+
+        // Apply card style mode
+        const mode = game.settings.get("chat-card-backgrounds", "cardStyle");
+
+        switch (mode) {
+            case "header":
+                element.classList.add("ccb-header");
+                element.style.setProperty("--ccb-text", text);
+                break;
+
+            case "underline":
+                element.classList.add("ccb-underline");
+                element.style.removeProperty("--ccb-text", text);
+                break;
+
+            case "topBar":
+                element.classList.add("ccb-topbar");
+                element.style.removeProperty("--ccb-text", text);
+                break;
+
+            case "message":
+                element.classList.add("ccb-message");
+                element.style.setProperty("--ccb-text", text);
+                break;
+
+            case "none":
+            default:
+                element.style.removeProperty("--ccb-text", text);
+                break;
         }
 
-        if (foundryBorder) {
-            return `border-color: ${foundryBorder}`;
-        }
-        return "";
-    });
+        const showUserAvatar = game.settings.get("chat-card-backgrounds", "insertSpeakerImage");
+        if (!showUserAvatar) return;
 
-    Handlebars.registerHelper("getCardClass", function (message) {
-        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-        if (shouldOverrideMessage(message) && cardStyle === "message") {
-            return "card-style-message";
-        }
-        return "";
-    });
+        // Only when speaking as USER
+        if (message.speaker?.token) return;
 
-    Handlebars.registerHelper("getHeaderStyle", function (message) {
-        if (shouldOverrideMessage(message)) {
-            const user = game.users.get(message.user);
+        if (!user?.avatar) return;
 
-            const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-            if (cardStyle !== "header" && cardStyle != "message") {
-                if (cardStyle === "underline") {
-                    return `border-bottom: 2px solid ${user.color.css};`;
-                }
-                return "";
-            }
+        const header = element.querySelector(".message-header");
+        if (!header) return;
 
-            /* With thanks to:
-             * https://24ways.org/2010/calculating-color-contrast/ */
-            const hexColor = user.color.css.replace("#", "");
-            var r = parseInt(hexColor.substr(0,2),16);
-            var g = parseInt(hexColor.substr(2,2),16);
-            var b = parseInt(hexColor.substr(4,2),16);
-            var yiq = ((r*299)+(g*587)+(b*114))/1000;
-            const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
+        // Avoid duplicates
+        if (header.querySelector(".portrait.user-avatar")) return;
 
-            return `background-color:${user.color.css}; color: ${textColor};`;
-        }
-        return "";
-    });
+        // Build portrait
+        const portrait = document.createElement("div");
+        portrait.classList.add("portrait", "user-avatar");
 
-    Handlebars.registerHelper("getMessageBodyStyle", function (message, foundryBorder) {
-        if (!shouldOverrideMessage(message)) return "";
+        const img = document.createElement("img");
+        img.src = user.avatar;
+        img.alt = user.name;
+        img.setAttribute("inert", "");
 
-        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-        const user = game.users.get(message.user);
-        if (!user?.color?.css) return "";
+        portrait.appendChild(img);
 
-        // ─────────────────────────────
-        // Non-message styles - border only
-        // ─────────────────────────────
-        if (cardStyle !== "message") {
-            const borderOverride = game.settings.get("chat-card-backgrounds", "borderOverride");
+        // Match PF2e spacing rules
+        header.classList.add("with-image");
 
-            if (borderOverride) {
-                return `border-color: ${user.color.css};`;
-            }
-
-            if (foundryBorder) {
-                return `border-color: ${foundryBorder};`;
-            }
-            return "";
-        }
-
-        // ─────────────────────────────
-        // Message style - full card
-        // ─────────────────────────────
-        /* With thanks to:
-         * https://24ways.org/2010/calculating-color-contrast/ */
-        const hex = user.color.css.replace("#", "");
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-
-        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        const textColor = (yiq >= 128) ? '#333' : '#E7E7E7';
-
-        return `
-            background-color:${user.color.css};
-            color: ${textColor};
-            border-color: ${user.color.css};
-        `;
-    });
-
-    Handlebars.registerHelper("getUserColor", function (message) {
-        if (shouldOverrideMessage(message)) {
-            const user = game.users.get(message.author);
-            return user.color.css;
-        }
-        return "";
-    });
-
-    Handlebars.registerHelper("getCardStyle", function () {
-        const cardStyle = game.settings.get("chat-card-backgrounds", "cardStyle");
-        return cardStyle;
+        // Insert at the front
+        header.prepend(portrait);
     });
 });

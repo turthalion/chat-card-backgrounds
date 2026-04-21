@@ -1,77 +1,154 @@
-.message-header {
-    display:flex;
-    align-items: center;
+/* border colouring */
+.chat-message.ccb-border {
+  border-color: var(--ccb-accent);
 }
 
-.portraitContainer {
-    height: 32px;
-    width: 48px;
+/* topBar colouring */
+.chat-message.ccb-topbar::before {
+  content: "";
+  display: block;
+  height: 4px;
+  background-color: var(--ccb-accent);
 }
 
-.portrait {
-    flex: 0;
-    border: none;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+/* Header-only card style */
+.chat-message.ccb-header .message-header {
+  background-color: var(--ccb-accent);
+  color: var(--ccb-text);
 }
 
-.message-content {
-    padding-top: 4px;
-    padding-bottom: 2px;
+/* Only apply to NON-tag text */
+.chat-message.ccb-header .message-header
+  :where(:not(.tag):not(.tags)) {
+  color: inherit;
 }
 
-.chat-message.card-style-message {
-    color: inherit;
+/* Do NOT color the body */
+.chat-message.ccb-header .message-content {
+  background: transparent;
+  color: inherit;
 }
 
-.chat-message.card-style-message .message-content,
-.chat-message.card-style-message .message-content *:not(.tag):not(.chat-attack):not(.chat-attack *) {
-    color: inherit;
+/* Underline mode: underline the entire header */
+/* This draws the line UNDER PF2e attack info */
+.chat-message.ccb-underline .message-header {
+  border-bottom: 2px solid var(--ccb-accent);
+  padding-bottom: 2px;
 }
 
-.chat-message.card-style-message .success,
-.chat-message.card-style-message .critical.success {
-  color: #1f7a1f;
+/* Full card colouring */
+.chat-message.ccb-message .message-header,
+.chat-message.ccb-message .message-content {
+  background-color: var(--ccb-accent);
+  color: var(--ccb-text);
 }
 
-.chat-message.card-style-message .failure,
-.chat-message.card-style-message .critical.failure {
-  color: #a62222;
+/* ONLY non-tag text */
+.chat-message.ccb-message .message-header
+  :where(:not(.tag):not(.tags)),
+.chat-message.ccb-message .message-content
+  :where(:not(.tag):not(.tags)) {
+  color: inherit;
 }
 
-.chat-message.card-style-message {
-    overflow: hidden;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+/* Make sure only our messages get this colour */
+.chat-message.ccb-header .message-header,
+.chat-message.ccb-message .message-content {
+  color: var(--ccb-text);
 }
 
-.chat-message.card-style-message .message-header,
-.chat-message.card-style-message .message-content {
-    background: transparent !important;
+/* Success colors */
+.chat-message.ccb-topbar .success,
+.chat-message.ccb-topbar .critical.success,
+.chat-message.ccb-header .success,
+.chat-message.ccb-header .critical.success,
+.chat-message.ccb-underline.success,
+.chat-message.ccb-underline .critical.success {
+  color: #1f7a1f !important;
 }
 
-.chat-message .message-content {
-    color: var(--chat-contrast-color);
+/* Failure colors */
+.chat-message.ccb-topbar .failure,
+.chat-message.ccb-topbar .critical.failure,
+.chat-message.ccb-header .failure,
+.chat-message.ccb-header .critical.failure,
+.chat-message.ccb-underline.failure,
+.chat-message.ccb-underline .critical.failure {
+  color: #a62222 !important;
 }
 
-.chat-message .message-content,
-.chat-message .message-content *:not(.tag):not(.chat-attack):not(.chat-attack *) {
-    color: inherit;
-}
+/* Never recolor system mechanics */
+/*
+.chat-message .dice-roll,
+.chat-message .dice-roll *,
+.chat-message .dice-tooltip,
+.chat-message .dice-tooltip *,
+.chat-message .message-buttons,
+.chat-message .message-buttons *,
+.chat-message .tag,
+.chat-message .tag *,
+.chat-message .tags,
+.chat-message .tags *,
+.chat-message .action,
+.chat-message .action * {
+  color: revert !important;
+  background: revert !important;
+  box-shadow: revert !important;
+} */
 
-.chat-message .message-header {
-    color: var(--chat-contrast-color); /* default for header text */
-}
-
-.chat-message .message-header .message-sender,
-.chat-message .message-header .message-metadata,
-.chat-message .message-header .user {
-    color: var(--chat-contrast-color); /* ensures sender, timestamp, and user use same color */
-}
-
-/* Force all text inside PF2e GM visibility blocks back to their default readable dark color */
-[data-visibility="gm"],
-[data-visibility="gm"] * {
+/* Force GM visibility colors in full message and header modes */
+.chat-message.ccb-message [data-visibility="gm"],
+.chat-message.ccb-message [data-visibility="gm"] *,
+.chat-message.ccb-header [data-visibility="gm"],
+.chat-message.ccb-header [data-visibility="gm"] * {
   color: #444444 !important;
+}
+
+/* Full-card mode: remove gap between header and content */
+.chat-message.ccb-message .message-header {
+  margin-bottom: 0;
+}
+
+.chat-message.ccb-message .message-content {
+  margin-top: 0;
+}
+
+.chat-message.ccb-message {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* D&D 5e: restore system background for card headers */
+/* .chat-message.ccb-message.dnd5e2
+  .chat-card .card-header.description {
+  background: var(--color-bg-light, #f0f0f0);
+  color: #222;
+  padding: 0.5em;
+  border-radius: 4px;
+} */
+
+/* D&D 5e: theme card header to match full card */
+.chat-message.ccb-message.dnd5e2
+  .chat-card .card-header.description {
+  background-color: rgba(0, 0, 0, 0.15);
+  color: var(--ccb-text);
+}
+
+.chat-message.ccb-message.dnd5e2
+  .chat-card .card-header.description * {
+  color: inherit;
+}
+
+/* D&D 5e: remove dice-total background in full-card mode */
+.chat-message.ccb-message.dnd5e2 .dice-total {
+  background: transparent;
+}
+
+/* User avatar portrait styling */
+.chat-message .portrait.user-avatar img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
